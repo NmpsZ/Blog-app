@@ -1,7 +1,6 @@
 import "./config/env.js";
 import express, { type NextFunction, type Request, type Response } from "express";
 import cors from "cors";
-import { uploadsDir } from "./utils/uploads.js";
 import { authMiddleware } from "./middlewares/authMiddleware.js";
 import { adminRoutes } from "./routes/adminRoutes.js";
 import { authRoutes } from "./routes/authRoutes.js";
@@ -12,7 +11,6 @@ const port = Number(process.env.PORT) || 4000;
 
 app.use(cors());
 app.use(express.json());
-app.use("/uploads", express.static(uploadsDir));
 
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true });

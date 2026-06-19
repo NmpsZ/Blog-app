@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 import { blogInputSchema, blogUpdateInputSchema } from "../validators/blogValidator.js";
-import { publicUploadPath } from "../utils/uploads.js";
+import { uploadToSupabase } from "../utils/uploads.js";
 
 type BlogFiles = {
   coverImage?: Express.Multer.File[];
@@ -150,8 +150,16 @@ export async function getAdminBlog(req: Request, res: Response) {
 export async function createBlog(req: Request, res: Response) {
   const parsed = blogInputSchema.safeParse(req.body);
   const files = req.files as BlogFiles | undefined;
-  const coverImage = files?.coverImage?.[0] ? publicUploadPath(files.coverImage[0]) : String(req.body.coverImage ?? "");
-  const images = files?.images?.map(publicUploadPath) ?? [];
+  
+  let coverImage = String(req.body.coverImage ?? "");
+  if (files?.coverImage?.[0]) {
+    coverImage = await uploadToSupabase(files.coverImage[0]);
+  }
+
+  let images: string[] = [];
+  if (files?.images?.length) {
+    images = await Promise.all(files.images.map(uploadToSupabase));
+  }
 
   if (!parsed.success) {
     res.status(400).json({ message: parsed.error.issues[0]?.message ?? "Invalid blog" });
@@ -204,7 +212,12 @@ export async function updateBlog(req: Request, res: Response) {
   }
 
   const existingImages = parseExistingImages(req.body.existingImages);
-  const uploadedImages = files?.images?.map(publicUploadPath) ?? [];
+  
+  let uploadedImages: string[] = [];
+  if (files?.images?.length) {
+    uploadedImages = await Promise.all(files.images.map(uploadToSupabase));
+  }
+  
   const images = [...existingImages, ...uploadedImages];
 
   if (images.length > 6) {
@@ -218,7 +231,7 @@ export async function updateBlog(req: Request, res: Response) {
   };
 
   if (files?.coverImage?.[0]) {
-    data.coverImage = publicUploadPath(files.coverImage[0]);
+    data.coverImage = await uploadToSupabase(files.coverImage[0]);
   } else if (req.body.coverImage) {
     data.coverImage = String(req.body.coverImage);
   }

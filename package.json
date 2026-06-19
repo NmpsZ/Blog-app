@@ -13,7 +13,6 @@
     "build:backend": "npm run build -w apps/backend",
     "build:frontend": "npm run build -w apps/frontend",
     "prisma:generate": "npm run prisma:generate -w apps/backend",
-    "prisma:migrate": "npm run prisma:migrate -w apps/backend",
-    "seed": "npm run seed -w apps/backend"
+    "prisma:migrate": "npm run prisma:migrate -w apps/backend"
   }
 }

@@ -38,6 +38,11 @@ export default function LoginPage() {
       
       <div className="bg-surface border border-divider shadow-sm rounded-none p-10 w-full max-w-md">
         <h1 className="text-4xl font-serif text-ink tracking-tight mb-8 text-center">เข้าสู่ระบบ (Login)</h1>
+
+        <div className="bg-paper border border-divider p-4 mb-6 text-sm text-ink-muted text-center">
+          <strong>ทดลองเข้าใช้งาน (Demo):</strong><br />
+          Username: <code>dev</code> | Password: <code>1234</code>
+        </div>
         
         {error ? (
           <div className="bg-red-50 border border-red-200 text-brand p-4 mb-6 text-sm">

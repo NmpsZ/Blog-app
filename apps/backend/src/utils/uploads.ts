@@ -1,19 +1,13 @@
-import fs from "node:fs";
-import path from "node:path";
 import multer from "multer";
+import { createClient } from "@supabase/supabase-js";
+import path from "node:path";
 
-export const uploadsDir = path.join(process.cwd(), "uploads");
+const supabaseUrl = process.env.SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_ANON_KEY || "";
 
-fs.mkdirSync(uploadsDir, { recursive: true });
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, callback) => callback(null, uploadsDir),
-  filename: (_req, file, callback) => {
-    const ext = path.extname(file.originalname);
-    const base = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9-]/g, "-");
-    callback(null, `${Date.now()}-${base}${ext}`);
-  }
-});
+const storage = multer.memoryStorage();
 
 export const upload = multer({
   storage,
@@ -31,6 +25,26 @@ export const upload = multer({
   }
 });
 
-export function publicUploadPath(file: Express.Multer.File) {
-  return `/uploads/${file.filename}`;
+export async function uploadToSupabase(file: Express.Multer.File): Promise<string> {
+  const ext = path.extname(file.originalname);
+  const base = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9-]/g, "-");
+  const filename = `${Date.now()}-${base}${ext}`;
+
+  const { data, error } = await supabase.storage
+    .from("blog-images")
+    .upload(filename, file.buffer, {
+      contentType: file.mimetype,
+      cacheControl: "3600",
+      upsert: false
+    });
+
+  if (error) {
+    throw new Error(`Failed to upload image: ${error.message}`);
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from("blog-images")
+    .getPublicUrl(data.path);
+
+  return publicUrlData.publicUrl;
 }
