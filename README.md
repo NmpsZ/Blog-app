@@ -35,37 +35,60 @@
 - **แก้ไข URL Slug**: รองรับการปรับแต่ง URL ของบทความให้เหมาะสมกับ SEO
 - **จัดการความคิดเห็น**: แอดมินสามารถดูรายการความคิดเห็นทั้งหมด และเลือกกด อนุมัติ (Approve) หรือ ปฏิเสธ (Reject) ได้ (ความคิดเห็นที่ถูก Reject จะถูกซ่อนจากหน้าเว็บทันที)
 
-## 🛠️ การ Deployment (ขึ้นใช้งานจริง)
+## 🛠️ การติดตั้งและเริ่มต้นใช้งาน (Getting Started)
 
-ระบบถูกออกแบบมาให้รองรับการนำไปใช้งานจริงบนคลาวด์ โดยแยกส่วนประกอบดังนี้:
+### สิ่งที่ต้องมี
+- Node.js (เวอร์ชัน 18 ขึ้นไป)
+- ฐานข้อมูล PostgreSQL
 
-### 1. ฐานข้อมูลและรูปภาพ (Supabase)
-ใช้ **Supabase** สำหรับระบบฐานข้อมูล (PostgreSQL) และการจัดเก็บไฟล์รูปภาพ (Supabase Storage)
-- สร้าง Project ใน Supabase
-- สร้าง Storage Bucket ชื่อ `blog-images` และตั้งเป็น **Public**
-- นำค่า `DATABASE_URL`, `SUPABASE_URL`, และ `SUPABASE_ANON_KEY` ไปใช้งานต่อในระบบหลังบ้าน
+### 1. การติดตั้ง
 
-### 2. ฝั่งหลังบ้าน (Backend - Web Service บน Render)
-- เชื่อมต่อ Github Repo ใน **Render** และเลือกประเภทเป็น **Web Service**
-- **Build Command**: `npm install && npm run build:backend`
-- **Start Command**: `cd apps/backend && npm start`
-- ใส่ค่าตัวแปรใน **Environment Variables**:
-  - `DATABASE_URL` = ลิ้งก์ฐานข้อมูล Supabase
-  - `SUPABASE_URL` = URL โปรเจกต์ของ Supabase
-  - `SUPABASE_ANON_KEY` = คีย์แบบ Public ของ Supabase
-  - `JWT_SECRET` = รหัสผ่านความปลอดภัย (ตั้งเอง)
-  - `PORT` = `4000` (หรือพอร์ตที่ต้องการ)
+โคลนโปรเจกต์และติดตั้ง Packages สำหรับทั้ง Frontend และ Backend:
 
-### 3. ฝั่งหน้าบ้าน (Frontend - Static Site บน Render)
-- สร้าง **Static Site** ใหม่ใน Render
-- **Build Command**: `npm install && npm run build:frontend`
-- **Publish Directory**: `apps/frontend/dist`
-- ใส่ค่าตัวแปรใน **Environment Variables**:
-  - `VITE_API_URL` = ลิ้งก์ URL ของ Backend ที่ได้จากข้อ 2
-- ตั้งค่า **Rewrite Rules** (สำหรับ React Router):
-  - **Source:** `/*`
-  - **Destination:** `/index.html`
-  - **Action:** `Rewrite`
+```bash
+# ติดตั้ง Packages สำหรับ Backend
+cd apps/backend
+npm install
+
+# ติดตั้ง Packages สำหรับ Frontend
+cd ../frontend
+npm install
+```
+
+### 2. การตั้งค่า Environment
+
+สร้างไฟล์ `.env` ไว้ในโฟลเดอร์ `apps/backend` และตั้งค่าฐานข้อมูลของคุณ:
+
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/blog_db"
+JWT_SECRET="your_super_secret_key"
+PORT=3000
+```
+
+### 3. การสร้างตารางฐานข้อมูล (Migration)
+
+รันคำสั่งนี้เพื่อสร้างตารางในฐานข้อมูลของคุณ:
+
+```bash
+cd apps/backend
+npx prisma db push
+```
+
+### 4. การเปิดใช้งานระบบ (Running the Application)
+
+**เปิดเซิร์ฟเวอร์ Backend (API):**
+```bash
+cd apps/backend
+npm run dev
+```
+
+**เปิดระบบ Frontend (Client):**
+```bash
+cd apps/frontend
+npm run dev
+```
+
+หน้าเว็บ Frontend จะเปิดอยู่ที่ `http://localhost:5173` ส่วน Backend API จะอยู่ที่ `http://localhost:3000`
 
 ---
 
