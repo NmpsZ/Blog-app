@@ -1,0 +1,38 @@
+# Dependency directories
+node_modules/
+
+# Build outputs
+dist/
+build/
+apps/frontend/dist/
+apps/backend/dist/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Uploads / Assets
+apps/backend/uploads/
+
+# IDE and Agent
+.vscode/
+.idea/
+.cursor/
+.agents/
+.gemini/
+.opencode/
+
+# Project documentation that may not be needed in repo
+agents.md
+DESIGN.md
+PRODUCT.md
+
+# OS generated files
+.DS_Store
+Thumbs.db
