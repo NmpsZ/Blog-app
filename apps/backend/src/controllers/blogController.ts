@@ -217,6 +217,10 @@ export async function updateBlog(req: Request, res: Response) {
 
   const existingImages = parseExistingImages(req.body.existingImages);
   
+  const data: Prisma.BlogUpdateInput = {
+    ...parsed.data,
+  };
+
   let uploadedImages: string[] = [];
   try {
     if (files?.images?.length) {
