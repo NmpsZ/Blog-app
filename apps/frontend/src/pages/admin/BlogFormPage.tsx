@@ -128,27 +128,39 @@ export default function BlogFormPage() {
               รูปเพิ่มเติม สูงสุด 6 รูป (Extra images Max 6)
               <input type="file" className="block w-full text-sm text-ink-muted file:mr-4 file:py-2 file:px-4 file:border file:border-divider file:text-xs file:uppercase file:tracking-widest file:font-semibold file:bg-paper file:text-ink hover:file:bg-divider transition-colors cursor-pointer" accept="image/*" multiple onChange={onExtraFiles} />
             </label>
-            {existingImages.length > 0 ? (
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                {existingImages.map((image, index) => (
-                  <div key={`${image}-${index}`} className="flex flex-col gap-2">
-                    <img src={imageUrl(image)} className="w-full aspect-square object-cover border border-divider" alt="Existing upload" />
-                    <button type="button" className="px-3 py-2 bg-transparent border border-divider text-red-600 text-xs tracking-widest uppercase font-semibold hover:bg-red-50 hover:border-red-200 transition-colors w-full" onClick={() => setExistingImages((items) => items.filter((_, i) => i !== index))}>
-                      Remove
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-            {imageFiles.length > 0 ? (
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                {imageFiles.map((file) => (
-                  <div key={file.name} className="relative aspect-square border border-divider overflow-hidden">
-                    <img src={URL.createObjectURL(file)} className="w-full h-full object-cover" alt={file.name} />
-                  </div>
-                ))}
-              </div>
-            ) : null}
+            <div className="grid grid-cols-2 gap-4 mt-2">
+              {existingImages.map((image, index) => (
+                <div key={`existing-${image}-${index}`} className="flex flex-col gap-2">
+                  <img src={imageUrl(image)} className="w-full aspect-square object-cover border border-divider" alt="Existing upload" />
+                  <button type="button" className="px-3 py-2 bg-transparent border border-divider text-red-600 text-xs tracking-widest uppercase font-semibold hover:bg-red-50 hover:border-red-200 transition-colors w-full" onClick={() => setExistingImages((items) => items.filter((_, i) => i !== index))}>
+                    Remove
+                  </button>
+                </div>
+              ))}
+              {imageFiles.map((file, index) => (
+                <div key={`new-${file.name}-${index}`} className="flex flex-col gap-2">
+                  <img src={URL.createObjectURL(file)} className="w-full aspect-square object-cover border border-divider" alt={file.name} />
+                  <button 
+                    type="button" 
+                    className="px-3 py-2 bg-transparent border border-divider text-red-600 text-xs tracking-widest uppercase font-semibold hover:bg-red-50 hover:border-red-200 transition-colors w-full" 
+                    onClick={() => {
+                      const newFiles = imageFiles.filter((_, i) => i !== index);
+                      setImageFiles(newFiles);
+                      
+                      // Update the native file input if possible
+                      const fileInput = document.querySelector('input[multiple]') as HTMLInputElement;
+                      if (fileInput) {
+                        const dataTransfer = new DataTransfer();
+                        newFiles.forEach(f => dataTransfer.items.add(f));
+                        fileInput.files = dataTransfer.files;
+                      }
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
