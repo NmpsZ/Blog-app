@@ -12,6 +12,10 @@ const port = Number(process.env.PORT) || 4000;
 app.use(cors());
 app.use(express.json());
 
+import path from "node:path";
+const uploadsDir = path.join(process.cwd(), "uploads");
+app.use("/uploads", express.static(uploadsDir));
+
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true });
 });
