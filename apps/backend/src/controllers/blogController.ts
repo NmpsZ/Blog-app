@@ -152,13 +152,17 @@ export async function createBlog(req: Request, res: Response) {
   const files = req.files as BlogFiles | undefined;
   
   let coverImage = String(req.body.coverImage ?? "");
-  if (files?.coverImage?.[0]) {
-    coverImage = await uploadToSupabase(files.coverImage[0]);
-  }
-
   let images: string[] = [];
-  if (files?.images?.length) {
-    images = await Promise.all(files.images.map(uploadToSupabase));
+  try {
+    if (files?.coverImage?.[0]) {
+      coverImage = await uploadToSupabase(files.coverImage[0]);
+    }
+    if (files?.images?.length) {
+      images = await Promise.all(files.images.map(uploadToSupabase));
+    }
+  } catch (error: any) {
+    res.status(500).json({ message: error.message || "Failed to upload image" });
+    return;
   }
 
   if (!parsed.success) {
@@ -214,8 +218,19 @@ export async function updateBlog(req: Request, res: Response) {
   const existingImages = parseExistingImages(req.body.existingImages);
   
   let uploadedImages: string[] = [];
-  if (files?.images?.length) {
-    uploadedImages = await Promise.all(files.images.map(uploadToSupabase));
+  try {
+    if (files?.images?.length) {
+      uploadedImages = await Promise.all(files.images.map(uploadToSupabase));
+    }
+    
+    if (files?.coverImage?.[0]) {
+      data.coverImage = await uploadToSupabase(files.coverImage[0]);
+    } else if (req.body.coverImage) {
+      data.coverImage = String(req.body.coverImage);
+    }
+  } catch (error: any) {
+    res.status(500).json({ message: error.message || "Failed to upload image" });
+    return;
   }
   
   const images = [...existingImages, ...uploadedImages];
@@ -225,16 +240,7 @@ export async function updateBlog(req: Request, res: Response) {
     return;
   }
 
-  const data: Prisma.BlogUpdateInput = {
-    ...parsed.data,
-    images
-  };
-
-  if (files?.coverImage?.[0]) {
-    data.coverImage = await uploadToSupabase(files.coverImage[0]);
-  } else if (req.body.coverImage) {
-    data.coverImage = String(req.body.coverImage);
-  }
+  data.images = images;
 
   try {
     const blog = await prisma.blog.update({
